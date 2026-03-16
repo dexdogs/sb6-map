@@ -183,8 +183,7 @@ export default function MapView({ dataCenters, powerPlants, layers, selectedDC, 
         source: 'dc-points',
         filter: ['==', ['get', 'isProof'], 1],
         layout: {
-          'text-field': '★ Google Haskell DC1
-Solar+BESS collocated',
+          'text-field': '★ Google · Solar+BESS',
           'text-size': 10,
           'text-anchor': 'left',
           'text-offset': [1.4, 0],
