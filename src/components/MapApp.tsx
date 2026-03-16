@@ -17,7 +17,6 @@ export interface LayerState {
   solarPotential: boolean
   googleProof: boolean
   powerPlants: boolean
-  sb6Arcs: boolean
   transmission: boolean
   solarHeatmap: boolean
 }
@@ -48,7 +47,6 @@ export function MapApp({ dataCenters, powerPlants, btmSiting, economics, regulat
     solarPotential: false,
     googleProof: false,
     powerPlants: false,
-    sb6Arcs: false,
     transmission: false,
     solarHeatmap: true,
   })

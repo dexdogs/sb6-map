@@ -409,38 +409,6 @@ export default function MapView({ dataCenters, powerPlants, layers, selectedDC, 
       .addTo(map)
   }, [layers.googleProof, mapLoaded]) // eslint-disable-line
 
-  // ── SB-6 EXPOSURE ARCS ────────────────────────────────────────
-  useEffect(() => {
-    const map = mapRef.current
-    if (!map || !mapLoaded) return
-    safeRemove(map, 'sb6-arcs')
-    if (!layers.sb6Arcs) return
-
-    const offsets: Record<string, [number, number]> = {
-      Taylor: [-0.04,-0.03], Shackelford: [-0.05,-0.04], Haskell: [-0.04,0.03],
-      Armstrong: [0.06,0.03], Dallas: [0.05,-0.04], Tarrant: [0.05,-0.04],
-      Caldwell: [0.07,0.03], Bexar: [0.05,0.03],
-    }
-
-    const features: GeoJSON.Feature[] = txDCs
-      .filter(dc => getSB6Status(dc) === 'mandatory')
-      .map(dc => {
-        const off = offsets[dc.county] ?? [0.05, -0.03]
-        const d = (dc.btm?.nearest_substation_dist_miles ?? 2) / 2
-        return {
-          type: 'Feature' as const,
-          properties: { mw: dc.capacity_mw_it ?? 100 },
-          geometry: { type: 'LineString' as const, coordinates: [[dc.lon!, dc.lat!], [dc.lon! + off[0]*d, dc.lat! + off[1]*d]] },
-        }
-      })
-
-    map.addSource('sb6-arcs', { type: 'geojson', data: { type: 'FeatureCollection', features } })
-    map.addLayer({
-      id: 'sb6-arcs', type: 'line', source: 'sb6-arcs',
-      paint: { 'line-color': '#ff4444', 'line-width': 1.5, 'line-opacity': 0.6, 'line-dasharray': [4,3] },
-    }, 'dc-ring')
-  }, [layers.sb6Arcs, mapLoaded]) // eslint-disable-line
-
   // ── SUBSTATION DOTS ───────────────────────────────────────────
   useEffect(() => {
     const map = mapRef.current

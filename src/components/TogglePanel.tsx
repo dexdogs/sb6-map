@@ -15,10 +15,7 @@ const OPPORTUNITY_LAYERS: { key: keyof LayerState; label: string; desc: string; 
 ]
 
 const CONTEXT_LAYERS: { key: keyof LayerState; label: string; desc: string; color: string; icon: string }[] = [
-  { key: 'powerPlants',  label: 'Power Plants',         desc: 'EIA-860 — nuclear, gas, coal, solar',    color: '#60a5fa', icon: '⚛' },
-  { key: 'sb6Arcs',      label: 'SB-6 Exposure Arcs',  desc: 'Grid constraint per project',             color: '#ff4444', icon: '⤳' },
-  { key: 'transmission', label: 'Substation Access',    desc: '345kV nodes + distance to project',      color: '#a78bfa', icon: '⊕' },
-]
+  { key: 'powerPlants',  label: 'Power Plants',         desc: 'EIA-860 — nuclear, gas, coal, solar',    color: '#60a5fa', icon: '⚛' },]
 
 export function TogglePanel({ layers, onToggle }: Props) {
   return (
