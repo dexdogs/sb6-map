@@ -214,6 +214,41 @@ Solar+BESS collocated',
         },
       }, 'dc-ring')
 
+
+      // ── Google DC1 permanent callout ──
+      map.addLayer({
+        id: 'google-proof-ring',
+        type: 'circle',
+        source: 'dc-points',
+        filter: ['==', ['get', 'isProof'], 1],
+        paint: {
+          'circle-radius': 20,
+          'circle-color': 'transparent',
+          'circle-stroke-width': 1.8,
+          'circle-stroke-color': '#22c55e',
+          'circle-stroke-opacity': 0.75,
+          'circle-pitch-alignment': 'map',
+        },
+      })
+      map.addLayer({
+        id: 'google-label',
+        type: 'symbol',
+        source: 'dc-points',
+        filter: ['==', ['get', 'isProof'], 1],
+        layout: {
+          'text-field': '★ Google · Solar+BESS',
+          'text-size': 10,
+          'text-anchor': 'left',
+          'text-offset': [1.6, 0],
+          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Regular'],
+        },
+        paint: {
+          'text-color': '#22c55e',
+          'text-halo-color': 'rgba(13,17,23,0.9)',
+          'text-halo-width': 1.5,
+        },
+      })
+
       // Click on DC dot
       map.on('click', 'dc-ring', (e) => {
         if (!e.features?.length) return

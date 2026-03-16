@@ -8,13 +8,15 @@ interface Props {
 }
 
 const OPPORTUNITY_LAYERS: { key: keyof LayerState; label: string; desc: string; color: string; icon: string }[] = [
-  { key: 'solarHeatmap',  label: 'Solar Resource',      desc: 'GHI by county — NREL NSRDB',              color: '#f0a500', icon: '☀' },
-  { key: 'bessRings',     label: 'BESS Compliance Rings', desc: '4CP savings + SB-6 curtailment buffer',  color: '#34d399', icon: '🔋' },
-  { key: 'solarPotential',label: 'BTM Solar Potential',  desc: 'MW buildable on owned land',             color: '#fbbf24', icon: '⚡' },
+  { key: 'solarHeatmap',   label: 'Solar Resource',       desc: 'GHI by county — NREL NSRDB',             color: '#f0a500', icon: '☀' },
+  { key: 'bessRings',      label: 'BESS Compliance Rings', desc: '4CP savings + SB-6 curtailment buffer',  color: '#34d399', icon: '🔋' },
+  { key: 'solarPotential', label: 'BTM Solar Potential',  desc: 'MW buildable on owned land',              color: '#fbbf24', icon: '⚡' },
 ]
 
 const CONTEXT_LAYERS: { key: keyof LayerState; label: string; desc: string; color: string; icon: string }[] = [
-  { key: 'powerPlants',  label: 'Power Plants',         desc: 'EIA-860 — nuclear, gas, coal, solar',    color: '#60a5fa', icon: '⚛' },]
+  { key: 'powerPlants',  label: 'Power Plants',     desc: 'EIA-860 — nuclear, gas, coal, solar', color: '#60a5fa', icon: '⚛' },
+  { key: 'transmission', label: 'Substation Access', desc: '345kV nodes + distance to project',   color: '#a78bfa', icon: '⊕' },
+]
 
 export function TogglePanel({ layers, onToggle }: Props) {
   return (
@@ -23,34 +25,22 @@ export function TogglePanel({ layers, onToggle }: Props) {
         <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-widest">Layers</span>
       </div>
 
-      {/* Opportunity group */}
       <div className="px-3 py-2">
         <div className="text-[9px] font-mono text-[var(--gold)] uppercase tracking-widest mb-2">The Opportunity</div>
         <div className="space-y-1">
           {OPPORTUNITY_LAYERS.map(l => (
-            <ToggleRow
-              key={l.key}
-              {...l}
-              active={layers[l.key]}
-              onToggle={() => onToggle(l.key)}
-            />
+            <ToggleRow key={l.key} {...l} active={layers[l.key]} onToggle={() => onToggle(l.key)} />
           ))}
         </div>
       </div>
 
       <div className="border-t border-[var(--border)]" />
 
-      {/* Context group */}
       <div className="px-3 py-2">
         <div className="text-[9px] font-mono text-[var(--gold)] uppercase tracking-widest mb-2">The Context</div>
         <div className="space-y-1">
           {CONTEXT_LAYERS.map(l => (
-            <ToggleRow
-              key={l.key}
-              {...l}
-              active={layers[l.key]}
-              onToggle={() => onToggle(l.key)}
-            />
+            <ToggleRow key={l.key} {...l} active={layers[l.key]} onToggle={() => onToggle(l.key)} />
           ))}
         </div>
       </div>
@@ -73,7 +63,6 @@ function ToggleRow({ icon, label, desc, color, active, onToggle }: {
       className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-left transition-all hover:bg-[var(--bg-card)] group"
       style={{ opacity: active ? 1 : 0.55 }}
     >
-      {/* Toggle pill */}
       <div
         className="relative flex-shrink-0 w-8 h-4 rounded-full transition-all"
         style={{ background: active ? color : 'var(--carbon-700, #21262d)', border: `1px solid ${active ? color : 'var(--border)'}` }}
@@ -83,7 +72,6 @@ function ToggleRow({ icon, label, desc, color, active, onToggle }: {
           style={{ left: active ? '14px' : '2px' }}
         />
       </div>
-
       <div className="min-w-0">
         <div className="flex items-center gap-1.5">
           <span className="text-[10px]">{icon}</span>
