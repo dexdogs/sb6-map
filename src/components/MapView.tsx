@@ -49,6 +49,7 @@ function safeRemove(map: mapboxgl.Map, ...ids: string[]) {
 export default function MapView({ dataCenters, powerPlants, layers, selectedDC, onSelectDC }: Props) {
   const EXCLUDE = ['Google Haskell County DC2', 'Meta El Paso', 'Fermi AEIC Amarillo Campus Ph1', 'Aligned Data Centers PNW', 'Meta Fort Worth']
 
+  const txDCs = dataCenters.filter(dc => dc.lat && dc.lon && !EXCLUDE.some(ex => dc.project_name.startsWith(ex)))
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<mapboxgl.Map | null>(null)
   const plantMarkersRef = useRef<mapboxgl.Marker[]>([])
