@@ -15,7 +15,6 @@ const MapView = dynamic(() => import('./MapView'), { ssr: false })
 export interface LayerState {
   bessRings: boolean
   solarPotential: boolean
-  googleProof: boolean
   powerPlants: boolean
   transmission: boolean
   solarHeatmap: boolean
@@ -40,12 +39,10 @@ interface Props {
 export function MapApp({ dataCenters, powerPlants, btmSiting, economics, regulatory, kpis }: Props) {
   const [showIntro, setShowIntro] = useState(true)
   const [selectedDC, setSelectedDC] = useState<EnrichedDC | null>(null)
-  const [showCompare, setShowCompare] = useState(false)
   const [activeView, setActiveView] = useState<'map' | 'case'>('map')
   const [layers, setLayers] = useState<LayerState>({
     bessRings: false,
     solarPotential: false,
-    googleProof: false,
     powerPlants: false,
     transmission: false,
     solarHeatmap: true,
@@ -91,134 +88,6 @@ export function MapApp({ dataCenters, powerPlants, btmSiting, economics, regulat
           <div className="absolute left-4 top-[72px] z-20 animate-fade-in">
             <TogglePanel layers={layers} onToggle={toggleLayer} />
           </div>
-
-          {/* Bottom compare button */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20">
-            <button
-              onClick={() => setShowCompare(v => !v)}
-              className="glass px-6 py-2.5 rounded-full text-sm font-medium tracking-wide transition-all hover:border-[var(--gold)] hover:text-[var(--gold)]"
-              style={{ fontFamily: 'var(--font-display)' }}
-            >
-              {showCompare ? '↓ Close comparison' : '⟷ Compare all projects →'}
-            </button>
-          </div>
-
-          {/* Detail drawer */}
-          {selectedDC && (
-            <DetailDrawer
-              dc={selectedDC}
-              economics={economics}
-              regulatory={regulatory}
-              onClose={() => setSelectedDC(null)}
-            />
-          )}
-
-          {/* Compare bar */}
-          {showCompare && (
-            <div className="absolute bottom-[56px] left-0 right-0 z-20 animate-fade-in">
-              <CompareBar dataCenters={dataCenters} economics={economics} />
-            </div>
-          )}
-        </>
-      )}
-
-      {/* The Case view */}
-      {activeView === 'case' && (
-        <div className="absolute inset-0 top-[56px] overflow-y-auto z-10">
-          <CaseView
-            dataCenters={dataCenters}
-            btmSiting={btmSiting}
-            economics={economics}
-            regulatory={regulatory}
-            kpis={kpis}
-          />
-        </div>
-      )}
-    </div>
-  )
-}
-
-// The Case — static scrollable argument
-function CaseView({ dataCenters, btmSiting, economics, regulatory, kpis }: Omit<Props, 'powerPlants'>) {
-  const mandatory = dataCenters.filter(dc =>
-    (dc.sb6_applies?.toLowerCase() || '').includes('yes')
-  )
-
-  return (
-    <div className="max-w-4xl mx-auto px-6 py-10 space-y-16">
-      {/* Section 1 */}
-      <section className="animate-fade-in">
-        <div className="text-xs font-mono text-[var(--gold)] tracking-widest mb-3 uppercase">01 — What SB-6 Did</div>
-        <h2 className="text-3xl font-semibold mb-6" style={{ lineHeight: 1.2 }}>
-          Texas passed a law in June 2025.<br />
-          <span className="text-[var(--red)]">Every new data center connecting to ERCOT</span><br />
-          now lives under new rules.
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[
-            { label: 'Mandatory curtailment', text: 'New loads ≥75MW connecting after Dec 31 2025 must install remote disconnect equipment before energization.' },
-            { label: 'Backup gen disclosure', text: 'Must disclose on-site backup generation to ERCOT. If it serves ≥50% of demand, ERCOT can direct its deployment during emergencies.' },
-            { label: '4CP cost allocation', text: 'Large loads now bear full interconnection costs. The 4CP methodology review could raise transmission charges further.' },
-          ].map(item => (
-            <div key={item.label} className="glass-card p-4">
-              <div className="text-xs font-mono text-[var(--gold)] mb-2 uppercase tracking-wide">{item.label}</div>
-              <p className="text-sm text-[var(--text-secondary)] leading-relaxed">{item.text}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Section 2 */}
-      <section>
-        <div className="text-xs font-mono text-[var(--gold)] tracking-widest mb-3 uppercase">02 — Who's Exposed</div>
-        <h2 className="text-2xl font-semibold mb-6">{mandatory.length} named projects. No disclosed BTM strategy for most.</h2>
-        <div className="overflow-hidden rounded-lg border border-[var(--border)]">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[var(--border)]" style={{ background: 'var(--bg-card)' }}>
-                {['Project', 'County', 'MW (IT)', 'Energization', 'BTM Strategy'].map(h => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-mono text-[var(--text-muted)] uppercase tracking-wide">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {mandatory.map((dc, i) => (
-                <tr key={dc.project_name} className="border-b border-[var(--border)] last:border-0 hover:bg-[var(--bg-card)] transition-colors">
-                  <td className="px-4 py-3 font-medium text-[var(--text-primary)]">
-                    {dc.project_name.replace(' (Crusoe/Oracle/OpenAI)', '').replace(' (Vantage/Oracle Stargate)', '')}
-                  </td>
-                  <td className="px-4 py-3 text-[var(--text-secondary)]">{dc.county}</td>
-                  <td className="px-4 py-3 text-[var(--gold)] font-mono">{dc.capacity_mw_it ? `${dc.capacity_mw_it} MW` : 'TBD'}</td>
-                  <td className="px-4 py-3 text-[var(--text-secondary)] text-xs">{dc.expected_energization_date}</td>
-                  <td className="px-4 py-3">
-                    {dc.project_name.includes('Google Haskell DC1') ? (
-                      <span className="badge-exempt px-2 py-0.5 rounded text-xs font-medium">Solar+BESS collocated ✓</span>
-                    ) : (
-                      <span className="text-[var(--text-muted)] text-xs">None disclosed</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* Section 3 */}
-      <section>
-        <div className="text-xs font-mono text-[var(--gold)] tracking-widest mb-3 uppercase">03 — The Resource Is There</div>
-        <h2 className="text-2xl font-semibold mb-2">West Texas has better solar than most of Arizona.</h2>
-        <p className="text-[var(--text-secondary)] mb-6">NREL NSRDB annual average GHI at exact project coordinates.</p>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {btmSiting.map(b => (
-            <div key={b.project_name} className="glass-card p-4">
-              <div className="text-xs text-[var(--text-muted)] mb-1 truncate">{b.project_name.split(' (')[0]}</div>
-              <div className="text-2xl font-mono font-semibold" style={{ color: b.ghi_kwh_m2_day > 5.7 ? 'var(--gold)' : 'var(--text-primary)' }}>
-                {b.ghi_kwh_m2_day}
-              </div>
-              <div className="text-xs text-[var(--text-muted)]">kWh/m²/day GHI</div>
-              <div className="text-xs text-[var(--green)] mt-2">{b.btm_solar_mw_potential} MW potential</div>
-            </div>
           ))}
         </div>
       </section>

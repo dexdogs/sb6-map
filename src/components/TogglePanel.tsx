@@ -11,7 +11,6 @@ const OPPORTUNITY_LAYERS: { key: keyof LayerState; label: string; desc: string; 
   { key: 'solarHeatmap',  label: 'Solar Resource',      desc: 'GHI by county — NREL NSRDB',              color: '#f0a500', icon: '☀' },
   { key: 'bessRings',     label: 'BESS Compliance Rings', desc: '4CP savings + SB-6 curtailment buffer',  color: '#34d399', icon: '🔋' },
   { key: 'solarPotential',label: 'BTM Solar Potential',  desc: 'MW buildable on owned land',             color: '#fbbf24', icon: '⚡' },
-  { key: 'googleProof',   label: 'Google Haskell Proof', desc: 'Solar+BESS collocated — already built',  color: '#22c55e', icon: '✓' },
 ]
 
 const CONTEXT_LAYERS: { key: keyof LayerState; label: string; desc: string; color: string; icon: string }[] = [

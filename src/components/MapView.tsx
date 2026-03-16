@@ -29,6 +29,16 @@ const GHI_POINTS = [
   { lat: 32.7767, lon: -97.2936,  ghi: 5.10 },
 ]
 
+
+// Projects excluded: wrong grid (WECC/SPP), duplicate coords, or WA state
+const EXCLUDE_PROJECTS = [
+  'Google Haskell County DC2',      // identical coords to DC1, no independent data
+  'Meta El Paso',                    // WECC territory, not ERCOT
+  'Fermi AEIC Amarillo Campus Ph1', // SPS/SPP territory, not ERCOT  
+  'Aligned Data Centers PNW (BESS precedent)', // WA state
+  'Meta Fort Worth',                 // pre-existing, no SB-6, no BTM data
+]
+
 function safeRemove(map: mapboxgl.Map, ...ids: string[]) {
   ids.forEach(id => {
     try { if (map.getLayer(id)) map.removeLayer(id) } catch {}
@@ -44,7 +54,7 @@ export default function MapView({ dataCenters, powerPlants, layers, selectedDC, 
   const [mapLoaded, setMapLoaded] = useState(false)
 
   // Texas-only DCs with valid coords
-  const txDCs = dataCenters.filter(dc => dc.state !== 'WA' && dc.lat && dc.lon)
+  undefined
 
   // ── INIT ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -164,6 +174,45 @@ export default function MapView({ dataCenters, powerPlants, layers, selectedDC, 
           'circle-pitch-alignment': 'map',
         },
       })
+
+
+      // ── Google Haskell DC1 special label ──
+      map.addLayer({
+        id: 'google-label',
+        type: 'symbol',
+        source: 'dc-points',
+        filter: ['==', ['get', 'isProof'], 1],
+        layout: {
+          'text-field': '★ Google Haskell DC1
+Solar+BESS collocated',
+          'text-size': 10,
+          'text-anchor': 'left',
+          'text-offset': [1.4, 0],
+          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Regular'],
+          'text-max-width': 12,
+        },
+        paint: {
+          'text-color': '#22c55e',
+          'text-halo-color': 'rgba(13,17,23,0.85)',
+          'text-halo-width': 1.5,
+        },
+      })
+
+      // Proof ring - always visible, not toggled
+      map.addLayer({
+        id: 'google-proof-ring',
+        type: 'circle',
+        source: 'dc-points',
+        filter: ['==', ['get', 'isProof'], 1],
+        paint: {
+          'circle-radius': 18,
+          'circle-color': 'transparent',
+          'circle-stroke-width': 1.5,
+          'circle-stroke-color': '#22c55e',
+          'circle-stroke-opacity': 0.6,
+          'circle-pitch-alignment': 'map',
+        },
+      }, 'dc-ring')
 
       // Click on DC dot
       map.on('click', 'dc-ring', (e) => {
@@ -363,51 +412,6 @@ export default function MapView({ dataCenters, powerPlants, layers, selectedDC, 
       },
     }, 'dc-ring')
   }, [layers.solarPotential, mapLoaded]) // eslint-disable-line
-
-  // ── GOOGLE PROOF ──────────────────────────────────────────────
-  useEffect(() => {
-    const map = mapRef.current
-    if (!map || !mapLoaded) return
-    safeRemove(map, 'google-proof')
-    popupRef.current?.remove()
-    if (!layers.googleProof) return
-
-    const gdc = txDCs.find(dc => dc.project_name.includes('Google Haskell DC1'))
-    if (!gdc?.lat || !gdc?.lon) return
-
-    map.addSource('google-proof', {
-      type: 'geojson',
-      data: {
-        type: 'FeatureCollection',
-        features: [{ type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [gdc.lon, gdc.lat] } }],
-      },
-    })
-    map.addLayer({
-      id: 'google-proof', type: 'circle', source: 'google-proof',
-      paint: {
-        'circle-radius': 24,
-        'circle-color': '#22c55e',
-        'circle-opacity': 0.1,
-        'circle-stroke-width': 2,
-        'circle-stroke-color': '#22c55e',
-        'circle-stroke-opacity': 0.9,
-        'circle-pitch-alignment': 'map',
-      },
-    }, 'dc-ring')
-
-    map.flyTo({ center: [gdc.lon, gdc.lat], zoom: 8.5, duration: 1200 })
-    popupRef.current = new mapboxgl.Popup({ closeButton: true, closeOnClick: false, offset: 28, anchor: 'bottom' })
-      .setLngLat([gdc.lon, gdc.lat])
-      .setHTML(`
-        <div style="font-size:11px;line-height:1.6;">
-          <div style="color:#22c55e;font-weight:700;margin-bottom:3px;">★ Google Haskell DC1</div>
-          <div>Solar + BESS collocated</div>
-          <div style="color:#8b949e;">Intersect Power / TPG Rise Climate</div>
-          <div style="color:#22c55e;margin-top:4px;font-size:10px;">SB-6 compliant by design ✓</div>
-        </div>
-      `)
-      .addTo(map)
-  }, [layers.googleProof, mapLoaded]) // eslint-disable-line
 
   // ── SUBSTATION DOTS ───────────────────────────────────────────
   useEffect(() => {
