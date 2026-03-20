@@ -1,8 +1,6 @@
-# sb6-map
-
 **The SB-6 Map** — Texas AI data centers, SB-6 exposure, and the solar+BESS bridge.
 
-Demo #9 · dexdogs
+Demo #12 · dexdogs
 
 ---
 
